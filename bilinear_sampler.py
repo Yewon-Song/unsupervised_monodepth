@@ -45,13 +45,13 @@ def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bili
             x1_f = x0_f + 1
 
             x0 = tf.cast(x0_f, tf.int32)
-            y0 = tf.cast(y0_f, tf.int32)
+            y0 = tf.cast(y0_f, tf.int32) # [0,,,,,0,,1,,,1,,,,256,,,256]
             x1 = tf.cast(tf.minimum(x1_f,  _width_f - 1 + 2 * _edge_size), tf.int32)
-
-            dim2 = (_width + 2 * _edge_size)
+            # x = [1,2,3,....,128, 1, 2, ,...,128]
+            dim2 = (_width + 2 * _edge_size)  # 길이=130
             dim1 = (_width + 2 * _edge_size) * (_height + 2 * _edge_size)
             base = _repeat(tf.range(_num_batch) * dim1, _height * _width)
-            base_y0 = base + y0 * dim2
+            base_y0 = base + y0 * dim2    # [130, 130,,......]
             idx_l = base_y0 + x0
             idx_r = base_y0 + x1
 
