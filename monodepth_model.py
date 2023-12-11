@@ -186,34 +186,24 @@ class MonodepthModel(object):
             conv7 = self.conv_block(conv6,            512, 3) # H/128
         
         with tf.variable_scope('decoder'):
+                    with tf.variable_scope('decoder'):
             upconv7 = upconv(conv7,  512, 3, 2) #H/64
-            iconv7  = conv(concat7,  512, 3, 1)
-
-            upconv6 = upconv(iconv7, 512, 3, 2) #H/32
-            iconv6  = conv(concat6,  512, 3, 1)
-
-            upconv5 = upconv(iconv6, 256, 3, 2) #H/16
-            iconv5  = conv(concat5,  256, 3, 1)
-
-            upconv4 = upconv(iconv5, 128, 3, 2) #H/8
-            iconv4  = conv(concat4,  128, 3, 1)
-            self.disp4 = self.get_disp(iconv4)
+            upconv6 = upconv(upconv7, 512, 3, 2) #H/32
+            upconv5 = upconv(upconv6, 256, 3, 2) #H/16
+            upconv4 = upconv(upconv5, 128, 3, 2) #H/8
+            self.disp4 = self.get_disp(upconv4)
             udisp4  = self.upsample_nn(self.disp4, 2)
-
-            upconv3 = upconv(iconv4,  64, 3, 2) #H/4
-            iconv3  = conv(concat3,   64, 3, 1)
-            self.disp3 = self.get_disp(iconv3)
+            upconv3 = upconv(udsip4,  64, 3, 2) #H/4
+            self.disp3 = self.get_disp(upconv3)
             udisp3  = self.upsample_nn(self.disp3, 2)
-
-            upconv2 = upconv(iconv3,  32, 3, 2) #H/2
-            iconv2  = conv(concat2,   32, 3, 1)
+            upconv2 = upconv(udisp3,  32, 3, 2) #H/2
             self.disp2 = self.get_disp(iconv2)
             udisp2  = self.upsample_nn(self.disp2, 2)
-
-            upconv1 = upconv(iconv2,  16, 3, 2) #H
+            upconv1 = upconv(udisp2,  16, 3, 2) #H
             concat1 = tf.concat([upconv1, udisp2], 3)
-            iconv1  = conv(concat1,   16, 3, 1)
-            self.disp1 = self.get_disp(iconv1)
+            self.disp1 = self.get_disp(concat1)
+
+
 
     def build_resnet50(self):
         #set convenience functions
