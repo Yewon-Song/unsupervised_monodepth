@@ -184,14 +184,6 @@ class MonodepthModel(object):
             conv5 = self.conv_block(conv4,            512, 3) # H/32
             conv6 = self.conv_block(conv5,            512, 3) # H/64
             conv7 = self.conv_block(conv6,            512, 3) # H/128
-
-        with tf.variable_scope('skips'):
-            skip1 = conv1
-            skip2 = conv2
-            skip3 = conv3
-            skip4 = conv4
-            skip5 = conv5
-            skip6 = conv6
         
         with tf.variable_scope('decoder'):
             upconv7 = upconv(conv7,  512, 3, 2) #H/64
