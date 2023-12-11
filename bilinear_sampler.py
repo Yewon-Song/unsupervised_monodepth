@@ -76,11 +76,12 @@ def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bili
 
             x_t_flat = tf.tile(x_t_flat, tf.stack([_num_batch, 1]))
             y_t_flat = tf.tile(y_t_flat, tf.stack([_num_batch, 1]))
-
-            x_t_flat = tf.reshape(x_t_flat, [-1])
+            # batch만큼 아래로 중복하여 붙인다. 그러면 n*1행렬이 될거다.
+            x_t_flat = tf.reshape(x_t_flat, [-1]) # 다시 일차원 행렬이 된다. 
             y_t_flat = tf.reshape(y_t_flat, [-1])
-
-            x_t_flat = x_t_flat + tf.reshape(x_offset, [-1]) * _width_f
+            x_t_flat = x_t_flat + tf.reshape(x_offset, [-1]) * _width_f  
+            # offset * width만큼 옆으로 옮긴다. 
+            
 
             input_transformed = _interpolate(input_images, x_t_flat, y_t_flat)
 
