@@ -19,14 +19,10 @@ import tensorflow as tf
 
 def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bilinear_sampler', **kwargs):
     def _repeat(x, n_repeats):
-        with tf.variable_scope('_repeat'):
             rep = tf.tile(tf.expand_dims(x, 1), [1, n_repeats])
             return tf.reshape(rep, [-1])
 
     def _interpolate(im, x, y):
-        with tf.variable_scope('_interpolate'):
-
-            # handle both texture border types
             _edge_size = 0
             if _wrap_mode == 'border':
                 _edge_size = 1
