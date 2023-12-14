@@ -18,11 +18,10 @@ from __future__ import absolute_import, division, print_function
 import tensorflow as tf
 
 def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bilinear_sampler', **kwargs):
-    def _repeat(x, n_repeats):
-            rep = tf.tile(tf.expand_dims(x, 1), [1, n_repeats])
-            return tf.reshape(rep, [-1])
-
     def _interpolate(im, x, y):
+        with tf.variable_scope('_interpolate'):
+
+            # handle both texture border types
             _edge_size = 0
             if _wrap_mode == 'border':
                 _edge_size = 1
@@ -41,13 +40,17 @@ def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bili
             x1_f = x0_f + 1
 
             x0 = tf.cast(x0_f, tf.int32)
-            y0 = tf.cast(y0_f, tf.int32) # [0,,,,,0,,1,,,1,,,,256,,,256]
+            y0 = tf.cast(y0_f, tf.int32)
             x1 = tf.cast(tf.minimum(x1_f,  _width_f - 1 + 2 * _edge_size), tf.int32)
-            # x = [1,2,3,....,128, 1, 2, ,...,128]
-            dim2 = (_width + 2 * _edge_size)  # 길이=130
+
+            dim2 = (_width + 2 * _edge_size)
             dim1 = (_width + 2 * _edge_size) * (_height + 2 * _edge_size)
-            base = _repeat(tf.range(_num_batch) * dim1, _height * _width)
-            base_y0 = base + y0 * dim2    # [130, 130,,......]
+
+            base_temp = tf.range(_num_batch) * dim1
+            rep = tf.tile(tf.expand_dims(base_temp, 1), [1, _height * _width])
+            base = tf.reshape(rep, [-1])
+            
+            base_y0 = base + y0 * dim2
             idx_l = base_y0 + x0
             idx_r = base_y0 + x1
 
@@ -72,12 +75,11 @@ def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bili
 
             x_t_flat = tf.tile(x_t_flat, tf.stack([_num_batch, 1]))
             y_t_flat = tf.tile(y_t_flat, tf.stack([_num_batch, 1]))
-            # batch만큼 아래로 중복하여 붙인다. 그러면 n*1행렬이 될거다.
-            x_t_flat = tf.reshape(x_t_flat, [-1]) # 다시 일차원 행렬이 된다. 
+
+            x_t_flat = tf.reshape(x_t_flat, [-1])
             y_t_flat = tf.reshape(y_t_flat, [-1])
-            x_t_flat = x_t_flat + tf.reshape(x_offset, [-1]) * _width_f  
-            # offset * width만큼 옆으로 옮긴다. 
-            
+
+            x_t_flat = x_t_flat + tf.reshape(x_offset, [-1]) * _width_f
 
             input_transformed = _interpolate(input_images, x_t_flat, y_t_flat)
 
@@ -98,3 +100,4 @@ def bilinear_sampler_1d_h(input_images, x_offset, wrap_mode='border', name='bili
 
         output = _transform(input_images, x_offset)
         return output
+=
